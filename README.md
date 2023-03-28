@@ -25,6 +25,6 @@ when to standardize
 
 
 ```
-# wine dataset. One of the columns, Proline, has an extremely high variance compared to the other columns.
+# wine dataset, One of the columns, Proline, has an extremely high variance compared to the other columns.
 wine.describe().loc['std']
 ```
