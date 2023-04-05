@@ -1,5 +1,27 @@
 # Preprocessing
 
+## missing value
+```
+* listwise deletion (delete entire records when 1 column has na)
+df.dropna(how='any')
+
+* drop missing values in specific col
+df.dropnna(subset=['VersionControl']
+
+* drop missing values in all col
+df.dropna(how='any',axis=1)
+
+df.drop(columns=[col])
+```
+
+## fill
+```
+df[col].fillna(val,inplace=True)
+
+```
+One approach to finding these values is to force the column to the data type desired using pd.to_numeric()
+
+
 ## Split
 ```
 from sklearn.model_selection import train_test_split
@@ -29,10 +51,66 @@ when to standardize
 wine.describe().loc['std']
 ```
 
+```
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(df[['Age']])
+df['standardized_col'] = scaler.transform(df[['Age']])
+```
+
+```
+# Import StandardScaler
+from sklearn.preprocessing import StandardScaler
+
+# Instantiate StandardScaler
+SS_scaler = StandardScaler()
+
+# Fit SS_scaler to the data
+SS_scaler.fit(so_numeric_df[['Age']])
+
+# Transform the data using the fitted scaler
+so_numeric_df['Age_SS'] = SS_scaler.transform(so_numeric_df[['Age']])
+
+# Compare the origional and transformed column
+print(so_numeric_df[['Age_SS', 'Age']].head())
+```
+
 ## Normalization
 * high variance data do normalization
+* make highly skewed to less skewed
 ```
 np.log(df[col])
+```
+```
+from sklearn.preprocessing import PowerTransformer
+log = PowerTransformer()
+log.fit(df[['ConvertedSalary']])
+df['log_ConvertedSalary'] = log.transform(df[['ConvertedSalary']])
+```
+```
+# Import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
+
+# Instantiate MinMaxScaler
+MM_scaler = MinMaxScaler()
+
+# Fit MM_scaler to the data
+MM_scaler.fit(so_numeric_df[['Age']])
+
+# Transform the data using the fitted scaler
+so_numeric_df['Age_MM'] = MM_scaler.transform(so_numeric_df[['Age']])
+
+# Compare the origional and transformed column
+print(so_numeric_df[['Age_MM', 'Age']].head())
+```
+
+
+
+```
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+scaler.fit(df[['Age']])
+df['normalized_age'] = scaler.transform(df[['Age']])
 ```
 
 ## Feature Scaling
@@ -145,6 +223,70 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_sta
 knn.fit(X_train, y_train)
 knn.score(X_test, y_test)
 ```
+
+## Removing outliers
+
+* 95 quantile
+```
+q_cutoff = df[col].quantile(0.95)
+mask = df[col] < q_cutoff
+trimmed_df = df[mask]
+```
+
+* 3 standard deviation from the mean
+```
+mean = df[col].mean()
+std = df[col].std()
+cut_off = std * 3
+
+lower, upper = mean - cut_off , mean + cut_off
+
+new_df = df[ (df[col] < upper) & (df[col] < lower) ]
+
+
+
+
+```
+
+### Train and Test
+```
+scaler = StandardScaler()
+scaler.fit(train[[col]])
+train[colscaled] = scaler.transform(train[[col]])
+
+test[colscaled] = scaler.transform(test[col]]
+```
+```
+# Import StandardScaler
+from sklearn.preprocessing import StandardScaler
+
+# Apply a standard scaler to the data
+SS_scaler = StandardScaler()
+
+# Fit the standard scaler to the data
+SS_scaler.fit(so_train_numeric[['Age']])
+
+# Transform the test data using the fitted scaler
+so_test_numeric['Age_ss'] = SS_scaler.transform(so_test_numeric[['Age']])
+print(so_test_numeric[['Age', 'Age_ss']].head())
+```
+
+
+
+same goes with removing outliers using traning lower and upper 
+```
+train_std = so_train_numeric['ConvertedSalary'].std()
+train_mean = so_train_numeric['ConvertedSalary'].mean()
+
+cut_off = train_std * 3
+train_lower, train_upper = train_mean - cut_off, train_mean + cut_off
+
+# Trim the test DataFrame
+trimmed_df = so_test_numeric[(so_test_numeric['ConvertedSalary'] < train_upper) \
+                             & (so_test_numeric['ConvertedSalary'] > train_lower)]
+```
+
+
 
 ## Dimensionality Reduction
 ```
